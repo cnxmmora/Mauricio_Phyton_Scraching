@@ -1,4 +1,4 @@
-# Scraping Take-Home - NYCRR Title 15
+﻿# Scraping Take-Home - NYCRR Title 15
 
 ![Prompt evidence screenshot](images/Captura%20de%20pantalla%202026-07-24%20132042.png)
 
@@ -209,6 +209,3 @@ With these versioned files, full scraping does not need to be repeated for revie
 ## Operational note
 
 If Westlaw invalidates cookies/session, a new online run may become partial. In that case, refresh headers/cookies and rerun. Meanwhile, the versioned JSONL/XLSX artifacts allow work to continue without data loss.
-#   M a u r i c i o _ P h y t o n _ S c r a c h i n g  
- #   M a u r i c i o _ P h y t o n _ S c r a c h i n g  
- 

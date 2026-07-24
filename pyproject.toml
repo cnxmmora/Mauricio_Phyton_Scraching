@@ -1,0 +1,44 @@
+[project]
+name = "regulation-scraper"
+version = "0.1.0"
+description = "Regulatory scrapers to support identification"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiofiles>=24.1.0",
+    "curl-cffi>=0.10.0",
+    "markitdown>=0.1.1",
+    "openpyxl>=3.1.5",
+    "pydantic>=2.11.4",
+    "selectolax>=0.3.29",
+    "typer>=0.15.3",
+]
+
+[project.scripts]
+regulation-scraper = "regulation_scraper.main:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "pytest-httpserver>=1.1.3",
+    "ruff>=0.11.8",
+]
+
+[tool.ruff.lint]
+select = ["TID252"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+asyncio_default_fixture_loop_scope = "class"
