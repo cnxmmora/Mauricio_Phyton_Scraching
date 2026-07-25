@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import json
+import re
 import uuid
 from pathlib import Path
 
@@ -122,12 +123,43 @@ def _write_excel_report(
     sections_rows: list[dict],
 ) -> None:
     workbook = Workbook()
-
-    _write_sheet(workbook.active, "reg_unit", units_rows)
-    _write_sheet(workbook.create_sheet("reg_section"), "reg_section", sections_rows)
+    _write_scraped_sheet(workbook.active, sections_rows, units_rows)
 
     excel_path = out_dir / f"{state}_scrape.xlsx"
     workbook.save(excel_path)
+
+    full_content_workbook = Workbook()
+    _write_sheet(full_content_workbook.active, "reg_unit", units_rows)
+    _write_sheet(
+        full_content_workbook.create_sheet("reg_section"),
+        "reg_section",
+        sections_rows,
+    )
+    full_content_path = out_dir / f"{state}_from_json_full_content.xlsx"
+    full_content_workbook.save(full_content_path)
+
+    _write_sections_content_excel(out_dir=out_dir, state=state, sections_rows=sections_rows)
+
+
+def _write_scraped_sheet(worksheet, sections_rows: list[dict], units_rows: list[dict]) -> None:
+    worksheet.title = "scraped"
+    worksheet.append(["type", "url", "name", "external_reference_id", "content"])
+
+    for row_type, rows in (("section", sections_rows), ("unit", units_rows)):
+        for row in rows:
+            worksheet.append(
+                [
+                    row_type,
+                    row.get("link"),
+                    row.get("name"),
+                    row.get("external_reference_id"),
+                    row.get("content"),
+                ]
+            )
+            url_cell = worksheet.cell(row=worksheet.max_row, column=2)
+            if isinstance(url_cell.value, str) and url_cell.value.startswith("http"):
+                url_cell.hyperlink = url_cell.value
+                url_cell.style = "Hyperlink"
 
 
 def _write_sheet(worksheet, title: str, rows: list[dict]) -> None:
@@ -145,10 +177,75 @@ def _write_sheet(worksheet, title: str, rows: list[dict]) -> None:
 
     worksheet.append(headers)
     for row in rows:
-        worksheet.append([_excel_cell_value(row.get(header)) for header in headers])
+        values = [_excel_cell_value(row.get(header)) for header in headers]
+        worksheet.append(values)
+        row_number = worksheet.max_row
+        for column_number, header in enumerate(headers, start=1):
+            if header != "link":
+                continue
+            cell = worksheet.cell(row=row_number, column=column_number)
+            if isinstance(cell.value, str) and cell.value.startswith("http"):
+                cell.hyperlink = cell.value
+                cell.style = "Hyperlink"
 
 
 def _excel_cell_value(value):
     if isinstance(value, (dict, list)):
         return json.dumps(value, ensure_ascii=False)
     return value
+
+
+def _is_continue_placeholder(content: str) -> bool:
+    if not content:
+        return False
+    return bool(
+        re.search(
+            r"\[\s*please click here to continue\s*\]\(",
+            content,
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+def _write_sections_content_excel(out_dir: Path, state: str, sections_rows: list[dict]) -> None:
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "section_content"
+
+    headers = [
+        "id",
+        "external_reference_id",
+        "name",
+        "status",
+        "link",
+        "unit_id",
+        "index",
+        "content",
+        "content_length",
+        "is_continue_placeholder",
+    ]
+    worksheet.append(headers)
+
+    for row in sections_rows:
+        content = str(row.get("content") or "")
+        worksheet.append(
+            [
+                row.get("id"),
+                row.get("external_reference_id"),
+                row.get("name"),
+                row.get("status"),
+                row.get("link"),
+                row.get("unit_id"),
+                row.get("index"),
+                content,
+                len(content),
+                _is_continue_placeholder(content),
+            ]
+        )
+        link_cell = worksheet.cell(row=worksheet.max_row, column=5)
+        if isinstance(link_cell.value, str) and link_cell.value.startswith("http"):
+            link_cell.hyperlink = link_cell.value
+            link_cell.style = "Hyperlink"
+
+    excel_path = out_dir / f"{state}_sections_content.xlsx"
+    workbook.save(excel_path)

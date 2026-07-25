@@ -38,8 +38,8 @@ Set-Location "c:\Users\User\Downloads\regulation-scraper Dev Test\regulation-scr
 $env:PYTHONPATH='src'
 $env:WESTLAW_CACHE_ONLY='0'
 $env:WESTLAW_REQUEST_DELAY='0.35'
-$env:WESTLAW_UNITS_JSONL='output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_unit/new_york_todo.jsonl'
-$env:WESTLAW_SECTIONS_JSONL='output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_section/new_york_todo.jsonl'
+$env:WESTLAW_UNITS_JSONL='output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_unit/new_york_todo.jsonl'
+$env:WESTLAW_SECTIONS_JSONL='output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_section/new_york_todo.jsonl'
 
 # 4) Run scraping
 .\.venv\Scripts\python.exe -m regulation_scraper --state new_york_todo output
@@ -60,10 +60,12 @@ $x=Join-Path $latest.FullName 'new_york_todo_scrape.xlsx'
 
 A full scraping test was executed and produced valid output with 95 units and 646 sections.
 
-- Final output folder: [output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8)
-- Units file (JSONL): [new_york_todo.jsonl](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_unit/new_york_todo.jsonl)
-- Sections file (JSONL): [new_york_todo.jsonl](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_section/new_york_todo.jsonl)
-- Final report (Excel): [new_york_todo_scrape.xlsx](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/new_york_todo_scrape.xlsx)
+- Final output folder: [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1)
+- Units file (JSONL): [new_york_todo.jsonl](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_unit/new_york_todo.jsonl)
+- Sections file (JSONL): [new_york_todo.jsonl](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_section/new_york_todo.jsonl)
+- Summary report (Excel): [new_york_todo_scrape.xlsx](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_scrape.xlsx)
+- Full-content report (Excel): [new_york_todo_from_json_full_content.xlsx](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_from_json_full_content.xlsx)
+- Section-content report (Excel): [new_york_todo_sections_content.xlsx](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_sections_content.xlsx)
 
 ## Quick start for reviewer
 
@@ -109,8 +111,8 @@ $env:PYTHONPATH='src'
 $env:WESTLAW_CACHE_ONLY='0'
 $env:WESTLAW_REQUEST_DELAY='0.35'
 
-$env:WESTLAW_UNITS_JSONL='output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_unit/new_york_todo.jsonl'
-$env:WESTLAW_SECTIONS_JSONL='output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_section/new_york_todo.jsonl'
+$env:WESTLAW_UNITS_JSONL='output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_unit/new_york_todo.jsonl'
+$env:WESTLAW_SECTIONS_JSONL='output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_section/new_york_todo.jsonl'
 
 .\.venv\Scripts\python.exe -m regulation_scraper --state new_york_todo output
 ```
@@ -142,9 +144,9 @@ Note: if you close the terminal or open a new tab, set the `$env:` variables aga
 
 ### 4) Verify generated files
 
-- Units JSONL: [output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_unit/new_york_todo.jsonl](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_unit/new_york_todo.jsonl)
-- Sections JSONL: [output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_section/new_york_todo.jsonl](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_section/new_york_todo.jsonl)
-- Exported Excel: [output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/new_york_todo_scrape.xlsx](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/new_york_todo_scrape.xlsx)
+- Units JSONL: [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_unit/new_york_todo.jsonl](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_unit/new_york_todo.jsonl)
+- Sections JSONL: [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_section/new_york_todo.jsonl](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_section/new_york_todo.jsonl)
+- Exported Excel: [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_scrape.xlsx](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_scrape.xlsx)
 
 ## Assignment objective
 
@@ -199,10 +201,12 @@ $env:WESTLAW_REQUEST_DELAY='0.6'
 
 - Local persistent HTTP cache: [.cache](.cache)
 - Final scraping output (source of truth for delivery):
-  - [output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_unit/new_york_todo.jsonl](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_unit/new_york_todo.jsonl)
-  - [output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_section/new_york_todo.jsonl](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/reg_section/new_york_todo.jsonl)
+   - [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_unit/new_york_todo.jsonl](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_unit/new_york_todo.jsonl)
+   - [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_section/new_york_todo.jsonl](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/reg_section/new_york_todo.jsonl)
 - Requested Excel export:
-  - [output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/new_york_todo_scrape.xlsx](output/2026-07-24_17_29_34-b3b64b82-fbf7-4fe3-88c7-5e564ee423c8/new_york_todo_scrape.xlsx)
+   - [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_scrape.xlsx](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_scrape.xlsx)
+   - [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_from_json_full_content.xlsx](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_from_json_full_content.xlsx)
+   - [output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_sections_content.xlsx](output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/new_york_todo_sections_content.xlsx)
 
 With these versioned files, full scraping does not need to be repeated for review or downstream usage.
 

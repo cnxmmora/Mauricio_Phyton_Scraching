@@ -182,8 +182,9 @@ out/
 .DS_Store
 
 # Scraper artifacts and manual downloads
-# output se versiona en esta prueba para conservar JSONL/XLSX de entrega.
-# output/
+output/*
+!output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/
+!output/2026-07-24_19_21_30-4e7f52c5-b1cc-42fc-afa2-d2e0e43fe7c1/**
 descargas_manual/
 
 # Local helper/probe scripts

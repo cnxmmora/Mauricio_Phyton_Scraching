@@ -26,6 +26,7 @@ _SITE_LIST = "https://govt.westlaw.com/SiteList"
 _NYCRR_INDEX = "https://govt.westlaw.com/nycrr/Index"
 _TITLE_15_NAME = "Title 15 Department of Motor Vehicles"
 _TITLE_15_PREFIX = "title 15"
+_DOCUMENT_PATH = "/nycrr/Document/"
 _SHORT_NAMES = {
     "Title": "T.",
     "Subtitle": "Subt.",
@@ -51,7 +52,6 @@ _UNITS_JSONL_ENV = "WESTLAW_UNITS_JSONL"
 _STRIP_QUERY_KEYS = {
     "bhjs",
     "bhqs",
-    "bhcp",
     "bhhash",
     "bhab",
     "bhav",
@@ -144,6 +144,35 @@ class NewYork(RegulationScraper):
         return attempt < _MAX_PAGE_ATTEMPTS
 
     @staticmethod
+    def _is_bridge_document_page(url: str, body: str) -> bool:
+        if _DOCUMENT_PATH not in url:
+            return False
+
+        body_lower = body.lower()
+        return "please click here to continue" in body_lower and "self.location.replace" in body_lower
+
+    @staticmethod
+    def _bridge_target_url(current_url: str, body: str) -> str | None:
+        # Prefer explicit JS redirect target, which usually includes bhcp=1.
+        match = re.search(r"self\.location\.replace\(\"([^\"]+)\"", body)
+        if match:
+            return urljoin(current_url, match.group(1))
+
+        # Fallback to noscript meta refresh if present.
+        html = HTMLParser(body)
+        for meta in html.css("meta[http-equiv]"):
+            if (meta.attrs.get("http-equiv") or "").strip().lower() != "refresh":
+                continue
+            content = (meta.attrs.get("content") or "").strip()
+            if "url=" not in content.lower():
+                continue
+            target = content.split("url=", 1)[1].strip().strip("\"'")
+            if target:
+                return urljoin(current_url, target)
+
+        return None
+
+    @staticmethod
     async def _sleep_backoff(attempt: int) -> None:
         await asyncio.sleep(min(2 ** attempt, 10))
 
@@ -173,6 +202,32 @@ class NewYork(RegulationScraper):
             return RuntimeError(f"Estado transitorio {response.status_code} para {url}")
 
         return None
+
+    async def _follow_bridge_document(
+        self,
+        url: str,
+        response_text: str,
+        timeout_seconds: int,
+    ) -> str | None:
+        redirected_url = self._bridge_target_url(url, response_text)
+        if not redirected_url or redirected_url == url:
+            return None
+
+        redirected_response, redirected_error = await self._attempt_fetch(
+            redirected_url,
+            timeout_seconds,
+        )
+        if redirected_error is not None or redirected_response is None:
+            return None
+
+        redirected_response.raise_for_status()
+        redirected_text = redirected_response.text or ""
+        if not redirected_text or self._is_bridge_document_page(
+            redirected_url,
+            redirected_text,
+        ):
+            return None
+        return redirected_text
 
     async def _resolve_seed(self) -> str:
         forced = os.getenv("WESTLAW_SEED_URL", "").strip()
@@ -250,7 +305,16 @@ class NewYork(RegulationScraper):
 
         if await aiofiles.os.path.exists(cache_path):
             async with aiofiles.open(cache_path, mode="r", encoding="utf-8", errors="ignore") as f:
-                return HTMLParser(await f.read()).root
+                cached_text = await f.read()
+
+            if cache_only or not self._is_bridge_document_page(url, cached_text):
+                return HTMLParser(cached_text).root
+
+            # Cached bridge pages are stale for extraction; refresh and overwrite cache.
+            response_text = await self._download_page_text(url)
+            async with aiofiles.open(cache_path, mode="w", encoding="utf-8") as f:
+                await f.write(response_text)
+            return HTMLParser(response_text).root
 
         if cache_only:
             raise RuntimeError(
@@ -295,8 +359,28 @@ class NewYork(RegulationScraper):
                 break
 
             response.raise_for_status()
+            response_text = response.text or ""
 
-            return response.text or ""
+            # Westlaw often serves a JS bridge page first; follow it once to obtain full document HTML.
+            if self._is_bridge_document_page(url, response_text):
+                redirected_text = await self._follow_bridge_document(
+                    url,
+                    response_text,
+                    timeout_seconds,
+                )
+                if redirected_text:
+                    return redirected_text
+
+                last_error = RuntimeError(
+                    f"Westlaw devolvio una pagina puente sin contenido para {url}"
+                )
+                await self._reset_session()
+                if self._can_retry(attempt):
+                    await self._sleep_backoff(attempt)
+                    continue
+                break
+
+            return response_text
 
         assert last_error is not None
         raise last_error
@@ -539,7 +623,7 @@ def _reg_unit(page_url: str, hierarchy: list[str]) -> RegulationUnit:
 
 
 def _link_kind(url: str) -> str | None:
-    if "/nycrr/Document/" in url:
+    if _DOCUMENT_PATH in url:
         return "document"
     if "/nycrr/Browse/Home/NewYork/UnofficialNewYorkCodesRulesandRegulations" in url:
         return "browse"
@@ -659,7 +743,7 @@ def _load_sections_manifest(path: Path) -> list[dict[str, Any]]:
             try:
                 record = json.loads(line)
                 link = _normalize_westlaw_url(str(record.get("link") or ""))
-                if not link or "/nycrr/Document/" not in link or link in seen_links:
+                if not link or _DOCUMENT_PATH not in link or link in seen_links:
                     continue
                 unit_id = UUID(str(record.get("unit_id")))
                 sections.append(
